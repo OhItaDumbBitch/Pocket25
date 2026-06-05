@@ -221,8 +221,12 @@ class MainActivity : FlutterActivity() {
             pendingUsbDevice = device
             usbPermissionResult = result
             
+            // Android 14+ forbids MUTABLE PendingIntents built from implicit intents,
+            // which silently breaks USB requestPermission (no dialog -> auto-denied).
+            // Scope the intent to our package to make it explicit.
             val permissionIntent = PendingIntent.getBroadcast(
-                this, 0, Intent(ACTION_USB_PERMISSION),
+                this, 0,
+                Intent(ACTION_USB_PERMISSION).setPackage(packageName),
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
             usbManager.requestPermission(device, permissionIntent)
